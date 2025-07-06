@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 import random
+import re
 from faker import Faker
 from datetime import datetime, timedelta
 import pandas as pd
@@ -9,6 +10,16 @@ import pykakasi
 fake = Faker('ja_JP')
 # 性別の選択肢
 genders = ['Men', 'Female']
+# マッピング: SQL型 → SQLAlchemy型
+type_map = {
+  "CHAR": "CHAR",
+  "VARCHAR": "VARCHAR",
+  "DATETIME": "DATETIME",
+  "INT": "Integer",
+  "TEXT": "String",
+  "DATE": "Date",
+  "TIMESTAMP": "DATETIME",
+}
 ## 漢字を平仮名に変換
 def convert_to_hiragana(text):
     kakasi = pykakasi.kakasi()
@@ -101,3 +112,45 @@ def create_table(df, table_name):
     insert_sql = f"INSERT INTO `{table_name}` ({', '.join(cols_without_id)}) VALUES ({', '.join(values)});"
     insert_sql_list.append(insert_sql)
   return create_table_sql, insert_sql_list
+# カラム定義を解析する関数
+def parse_column(line):
+  # 列定義を正規表現で分解
+  match = re.match(r'\s*`?(\w+)`?\s+([A-Z]+)(?:\((\d+)\))?.*', line, re.IGNORECASE)
+  if not match:
+    return None
+  name, t, length = match.groups()
+  t = t.upper()
+  if t in type_map:
+    if length:
+      col_type = f"{type_map[t]}({length})"
+    else:
+      col_type = type_map[t]
+  else:
+    col_type = t
+  is_pk = 'PRIMARY KEY' in line.upper()
+  return name, col_type, is_pk
+# SQLAlchemyモデルクラスを生成する関数
+def convert_to_model(table_name, columns):
+  lines = []
+  lines.append("# -*- encoding: utf-8 -*-")
+  lines.append("import datetime")
+  lines.append("import uuid")
+  lines.append("import sys")
+  lines.append("from sqlalchemy import (Column, String,Integer, Text, ForeignKey,CHAR, VARCHAR, INT, create_engine, MetaData, DECIMAL, DATETIME, exc, event, Index, and_)")
+  lines.append("from sqlalchemy.ext.declarative import declarative_base")
+  lines.append("sys.dont_write_bytecode = True")
+  lines.append("## SQLAlchemyのベースクラスを定義  ")
+  lines.append("Base = declarative_base()")
+  lines.append(f"## {table_name.capitalize()}モデルクラスの定義")
+  lines.append(f"class {table_name.capitalize()}(Base):")
+  lines.append(f"  __tablename__ = '{table_name}'")
+  for name, col_type, is_pk in columns:
+    pk = ", primary_key=True" if is_pk else ""
+    lines.append(f"  {name} = Column({col_type}{pk})")
+  # __init__メソッドの自動生成（idと日付系を自動セット）
+  lines.append("  def __init__(self):")
+  lines.append("    self.id = str(uuid.uuid4())")
+  lines.append('    now_data_time = str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))')
+  lines.append("    self.create_at =  now_data_time")
+  lines.append("    self.update_at =  now_data_time")
+  return "\n".join(lines)

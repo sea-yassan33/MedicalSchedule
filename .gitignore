@@ -2,3 +2,5 @@ __pycache__
 *.pyc
 sql_folder
 sql_folder/*
+Work/out/*.py
+.env
