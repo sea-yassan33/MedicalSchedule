@@ -4,3 +4,4 @@ sql_folder
 sql_folder/*
 Work/out/*.py
 .env
+Work/memo.md
