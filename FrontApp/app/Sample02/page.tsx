@@ -24,16 +24,16 @@ const rooms = [
 ];
 
 const initialAppointments = [
-  { id: "a", patient_name: "患者A", start: "09:20", duration: 2, room_id: "1" },
+  { id: "a", patient_name: "患者A", start: "09:30", duration: 2, room_id: "1" },
   { id: "b", patient_name: "患者B", start: "10:00", duration: 2, room_id: "2" },
-  { id: "c", patient_name: "患者C", start: "09:20", duration: 3, room_id: "4" },
+  { id: "c", patient_name: "患者C", start: "09:30", duration: 3, room_id: "4" },
   { id: "d", patient_name: "患者D", start: "10:00", duration: 5, room_id: "3" },
-  { id: "e", patient_name: "新患E", start: "11:20", duration: 3, room_id: "4" },
+  { id: "e", patient_name: "新患E", start: "11:30", duration: 3, room_id: "4" },
 ];
 
 const timeSlots = Array.from({ length: 24 }, (_, i) => {
-  const hour = 9 + Math.floor(i / 3);
-  const minutes = (i % 3) * 20;
+  const hour = 9 + Math.floor(i / 2);
+  const minutes = (i % 2) * 30;
   return `${hour.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 });
 
@@ -66,12 +66,12 @@ export default function Sample02() {
   const handleSave = () => {
     setError("");
     const newStart = toMinutes(form.start);
-    const newEnd = newStart + Number(form.duration) * 20;
+    const newEnd = newStart + Number(form.duration) * 30;
 
     const hasOverlap = appointments.some((appt) => {
       if (!selectedAppt || appt.id === selectedAppt.id || appt.room_id !== form.room_id) return false;
       const apptStart = toMinutes(appt.start);
-      const apptEnd = apptStart + appt.duration * 20;
+      const apptEnd = apptStart + appt.duration * 30;
       return newStart < apptEnd && newEnd > apptStart;
     });
 
