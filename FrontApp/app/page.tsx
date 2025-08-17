@@ -2,19 +2,7 @@ import Link from 'next/link';
 import { tv } from 'tailwind-variants';
 import Image from "next/image";
 import Footer from "./_components/Footer";
-
-type Appointment = {
-  time: string;
-  room: string;
-  patient: string;
-  doctor: string;
-};
-
-const appointments: Appointment[] = [
-  { time: "10:00", room: "診察台 1", patient: "キタムラ", doctor: "ケビン" },
-  { time: "15:00", room: "診察台 2", patient: "カトリ", doctor: "キム" },
-  { time: "16:00", room: "カウンセリング室", patient: "オグラ", doctor: "ジャスミン" },
-];
+import NewPatients from './_components/NewPatients';
 
 export default function Home() {
   const twStayles = tv({
@@ -52,34 +40,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        {/* 下部: テーブル */}
-        <div className="mt-10 w-full max-w-5xl">
-          {/* ヘッダー */}
-          <div className="bg-orange-500 text-white px-4 py-2 rounded-t-lg font-bold">
-            本日（2025/8/1）の新患
-          </div>
-          {/* テーブル本体 */}
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-orange-100 text-left">
-                <th className="p-2 w-1/6">時間</th>
-                <th className="p-2 w-1/4">診察台</th>
-                <th className="p-2 w-1/4">患者名</th>
-                <th className="p-2 w-1/4">担当医師</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map((a, i) => (
-                <tr key={i} className="border-b">
-                  <td className="p-2">{a.time}</td>
-                  <td className="p-2">{a.room}</td>
-                  <td className="p-2">{a.patient}</td>
-                  <td className="p-2">{a.doctor}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <NewPatients />
       </main>
       <Footer />
     </>

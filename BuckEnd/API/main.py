@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, Path, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import models
 import handle_db
-import datetime
+from datetime import datetime
 
 app = FastAPI()
 
@@ -32,6 +32,34 @@ async def get_list_user():
 @app.get(path="/api/customers/{customer_id}")
 async def get_user(customer_id: str):
   result = handle_db.select_customer(customer_id)
+  if result == 1:
+    raise HTTPException(status_code=404, detail="Query Error!!")
+  return {
+    "status": "OK",
+    "data": result
+  }
+## 予約データ取得
+@app.get(path="/api/appoints/{start_date}")
+async def get_appoints(start_date: str):
+  dt = datetime.strptime(start_date, '%Y-%m-%d')
+  start_date_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+  print(f"[log]Start Date: {start_date_str}")
+  result = handle_db.slect_appoints_date(start_date_str)
+  #result = []
+  if result == 1:
+    raise HTTPException(status_code=404, detail="Query Error!!")
+  return {
+    "status": "OK",
+    "data": result
+  }
+## 予約データ取得(新患のみ)
+@app.get(path="/api/appoints/{start_date}/new")
+async def get_appoints(start_date: str):
+  dt = datetime.strptime(start_date, '%Y-%m-%d')
+  start_date_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+  print(f"[log]Start Date: {start_date_str}")
+  result = handle_db.slect_new_appoints_date(start_date_str)
+  #result = []
   if result == 1:
     raise HTTPException(status_code=404, detail="Query Error!!")
   return {
